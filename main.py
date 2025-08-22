@@ -18,13 +18,14 @@ def download(uri, dest_folder):
     filename = uri.split("/")[-1]
     dest_path = dest_folder / filename
     open(dest_path, "wb").write(get(uri))
+    return package.joinpath(filename)
 
 releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
 assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]["id"]}/assets")
 
 url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
 
-download(url, package)
+hekate = download(url, package)
 
 del url, assets, releases
 

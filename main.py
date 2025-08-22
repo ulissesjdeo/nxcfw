@@ -1,8 +1,8 @@
 from urllib.request import Request, urlopen
+from tarfile import open as taropen
 from shutil import rmtree, copytree
 from zipfile import ZipFile
 from pathlib import Path
-from tarfile import open
 from json import loads
 
 def log(message):
@@ -21,6 +21,8 @@ def download(uri, dest_folder):
     dest_path.write_bytes(get(uri))
     return dest_path
 
+build = open('build.txt', 'w')
+
 log("Cleaning environment...")
 package = Path("package")
 rmtree(package, ignore_errors=True)
@@ -30,6 +32,7 @@ log("Getting latest bootloader...")
 releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
 assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]['id']}/assets")
 url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
+build.write(f'hekate_ver={releases[0]['tag_name'].split("v")[1]}\n')
 
 log("Downloading and unzipping files...")
 hekate_zip = download(url, package)
@@ -54,9 +57,8 @@ log("Copying new files...")
 copytree("sdcard/bootloader", "package/bootloader", dirs_exist_ok=True)
 
 log("Compressing archive...")
-open("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)
+taropen("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)
 rmtree(package, ignore_errors=True)
 
-del bootloader, dir, file, package, open
 print("Done")
 exit(0)

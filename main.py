@@ -1,6 +1,6 @@
 from urllib.request import Request, urlopen
+from shutil import rmtree, copytree
 from zipfile import ZipFile
-from shutil import rmtree
 from pathlib import Path
 from tarfile import open
 from json import loads
@@ -31,21 +31,27 @@ releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
 assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]['id']}/assets")
 url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
 
-log("Unzipping files...")
+log("Downloading and unzipping files...")
 hekate_zip = download(url, package)
 ZipFile(hekate_zip, "r").extractall(package)
 hekate_zip.unlink()
 
-del releases, assets, url, hekate_zip
+for bin in package.glob("hekate*.bin"):
+    bin.rename(package / "payload.bin")
+
+del releases, assets, url, hekate_zip, bin
 
 log("Cleaning files...")
 bootloader = package / "bootloader"
 
 for dir in [bootloader/"res", bootloader/"payloads", bootloader/"ini"]:
-    rmtree(dir)
+    rmtree(dir, ignore_errors=True)
 
 for file in [bootloader/"update.bin"]:
     file.unlink()
+
+log("Copying new files...")
+copytree("sdcard/bootloader", "package/bootloader", dirs_exist_ok=True)
 
 log("Compressing archive...")
 open("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)

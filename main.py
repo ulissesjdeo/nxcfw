@@ -4,9 +4,8 @@ from shutil import rmtree
 from pathlib import Path
 from json import loads
 
-package = Path("package")
-rmtree(package, ignore_errors=True)
-package.mkdir()
+def log(message):
+    print(f"=> {message}")
 
 def get(uri):
     with urlopen(Request(uri)) as response:
@@ -21,17 +20,24 @@ def download(uri, dest_folder):
     dest_path.write_bytes(get(uri))
     return dest_path
 
+log("Cleaning environment...")
+package = Path("package")
+rmtree(package, ignore_errors=True)
+package.mkdir()
+
+log("Getting latest bootloader...")
 releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
 assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]['id']}/assets")
-
 url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
 
+log("Unzipping files...")
 hekate_zip = download(url, package)
 ZipFile(hekate_zip, "r").extractall(package)
 hekate_zip.unlink()
 
 del releases, assets, url, hekate_zip
 
+log("Cleaning files...")
 bootloader = package / "bootloader"
 
 for dir in [bootloader/"res", bootloader/"payloads", bootloader/"ini"]:
@@ -41,4 +47,5 @@ for file in [bootloader/"update.bin"]:
     file.unlink()
 
 del bootloader, dir, file, package
+log("Done.")
 exit(0)

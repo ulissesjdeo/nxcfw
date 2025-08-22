@@ -52,5 +52,5 @@ open("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)
 rmtree(package, ignore_errors=True)
 
 del bootloader, dir, file, package, open
-log("Done.")
+print("Done")
 exit(0)

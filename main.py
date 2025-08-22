@@ -2,6 +2,7 @@ from urllib.request import Request, urlopen
 from zipfile import ZipFile
 from shutil import rmtree
 from pathlib import Path
+from tarfile import open
 from json import loads
 
 def log(message):
@@ -46,6 +47,10 @@ for dir in [bootloader/"res", bootloader/"payloads", bootloader/"ini"]:
 for file in [bootloader/"update.bin"]:
     file.unlink()
 
-del bootloader, dir, file, package
+log("Compressing archive...")
+open("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)
+rmtree(package, ignore_errors=True)
+
+del bootloader, dir, file, package, open
 log("Done.")
 exit(0)

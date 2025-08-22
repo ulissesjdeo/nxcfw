@@ -1,4 +1,5 @@
 from urllib.request import Request, urlopen
+from zipfile import ZipFile
 from shutil import rmtree
 from pathlib import Path
 from json import loads
@@ -17,16 +18,27 @@ def get_json(uri):
 def download(uri, dest_folder):
     filename = uri.split("/")[-1]
     dest_path = dest_folder / filename
-    open(dest_path, "wb").write(get(uri))
-    return package.joinpath(filename)
+    dest_path.write_bytes(get(uri))
+    return dest_path
 
 releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
-assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]["id"]}/assets")
+assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]['id']}/assets")
 
 url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
 
-hekate = download(url, package)
+hekate_zip = download(url, package)
+ZipFile(hekate_zip, "r").extractall(package)
+hekate_zip.unlink()
 
-del url, assets, releases
+del releases, assets, url, hekate_zip
 
-pass
+bootloader = package / "bootloader"
+
+for dir in [bootloader/"res", bootloader/"payloads", bootloader/"ini"]:
+    rmtree(dir)
+
+for file in [bootloader/"update.bin"]:
+    file.unlink()
+
+del bootloader, dir, file, package
+exit(0)

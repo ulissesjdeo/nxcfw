@@ -1,3 +1,4 @@
 *.xz
 .idea/
 package/
+token.txt

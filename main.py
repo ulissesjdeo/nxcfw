@@ -5,11 +5,23 @@ from zipfile import ZipFile
 from pathlib import Path
 from json import loads
 
+
 def log(message):
     print(f"=> {message}")
 
+
+token = Path("token.txt")
+if token.exists():
+    HEADERS = {"Authorization": f"token {token.read_text().strip()}", "User-Agent": "HATS-Pack-Script"}
+    log("Using GitHub token authentication")
+else:
+    HEADERS = {"User-Agent": "HATS-Pack-Script"}
+    log("Running anonymously (missing token.txt)")
+
+
 def get(uri):
-    with urlopen(Request(uri)) as response:
+    req = Request(uri, headers=HEADERS)
+    with urlopen(req) as response:
         return response.read()
 
 def get_json(uri):

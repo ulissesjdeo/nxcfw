@@ -31,18 +31,24 @@ package.mkdir()
 log("Getting latest bootloader...")
 releases = get_json("https://api.github.com/repos/ctcaer/hekate/releases")
 assets = get_json(f"https://api.github.com/repos/ctcaer/hekate/releases/{releases[0]['id']}/assets")
-url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
+hekate_url = [a for a in assets if a["name"].startswith("hekate")][0]["browser_download_url"]
 build.write(f'hekate_ver={releases[0]['tag_name'].split("v")[1]}\n')
 
+releases = get_json("https://api.github.com/repos/Atmosphere-NX/Atmosphere/releases")
+assets = get_json(f"https://api.github.com/repos/Atmosphere-NX/Atmosphere/releases/{releases[0]['id']}/assets")
+atmosphere_url = [a for a in assets if a["name"].startswith("atmosphere")][0]["browser_download_url"]
+build.write(f'atmosphere_ver={releases[0]['tag_name']}\n')
+
 log("Downloading and unzipping files...")
-hekate_zip = download(url, package)
+hekate_zip = download(hekate_url, package)
 ZipFile(hekate_zip, "r").extractall(package)
 hekate_zip.unlink()
+atmosphere_zip = download(atmosphere_url, package)
+ZipFile(atmosphere_zip, "r").extractall(package)
+atmosphere_zip.unlink()
 
 for bin in package.glob("hekate*.bin"):
     bin.rename(package / "payload.bin")
-
-del releases, assets, url, hekate_zip, bin
 
 log("Cleaning files...")
 bootloader = package / "bootloader"

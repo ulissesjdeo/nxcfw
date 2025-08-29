@@ -1,1 +1,2 @@
 hekate_ver=6.3.1
+atmosphere_ver=1.9.3

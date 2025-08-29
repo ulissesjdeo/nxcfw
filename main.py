@@ -51,12 +51,28 @@ for bin in package.glob("hekate*.bin"):
     bin.rename(package / "payload.bin")
 
 log("Cleaning files...")
+atmosphere = package / "atmosphere"
 bootloader = package / "bootloader"
+switch = package / "switch"
 
-for dir in [bootloader/"res", bootloader/"payloads", bootloader/"ini"]:
+for dir in [
+    atmosphere/"config_templates",
+    atmosphere/"hbl_html",
+    atmosphere/"kip_patches",
+    bootloader/"ini",
+    bootloader/"payloads",
+    bootloader/"res",
+    bootloader/"sys"/"l4t"  # Keep if wanna use Linux
+]:
     rmtree(dir, ignore_errors=True)
 
-for file in [bootloader/"update.bin"]:
+for file in [
+    atmosphere/"hbl.nsp",
+    bootloader/"update.bin",
+    switch/"daybreak.nro",
+    switch/"haze.nro",
+    switch/"reboot_to_payload.nro"
+]:
     file.unlink()
 
 log("Copying new files...")

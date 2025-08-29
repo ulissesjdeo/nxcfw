@@ -88,7 +88,7 @@ for file in [
     file.unlink()
 
 log("Copying new files...")
-copytree("sdcard/bootloader", "package/bootloader", dirs_exist_ok=True)
+copytree("sdcard", "package", dirs_exist_ok=True)
 
 log("Compressing archive...")
 taropen("package.tar.xz", "w:xz", preset=9).add(package, arcname=package.name)
